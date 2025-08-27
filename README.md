@@ -36,17 +36,24 @@ This project provides a numerical simulation of a filament–crosslinker model a
    python3.10 -m virtualenv .venv
    source .venv/bin/activate
    ```  
-3. Install dependencies  
+3. Install dependencies
+    
+    3.1 Mac / Linux
    ```bash
    pip install -r requirements.txt
    ```  
-
+    3.2 Windows
+   ```bash
+   pip install uv
+   uv add -r requirements.txt
+   ```
+   
 ## Project Structure
-- `lib_simulation.py`  
+- `generic_code.py`  
   Implements the filament–crosslinker simulation using the Dedalus PDE framework.  
 - `generic_analyse_script.py`  
   Loads the resulting HDF5 files, computes key metrics, and generates plots & animations.  
-- `generic_code.py`  
+- `lib_simulation.py`  
   Collection of helper functions (I/O, normalization, etc.) used by the other scripts.  
 - `main.py`  
   Wrapper script that runs simulation and analysis back-to-back.  
