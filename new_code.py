@@ -16,7 +16,7 @@ import sys
 # local library
 dir_local = os.path.dirname(__file__)
 sys.path.append(dir_local)
-lib_path = "/home/cedrik/Documents/filaments-crosslinkers-projects/lib"
+lib_path = "/home/benji/PycharmProjects/FCI-ExplorationProject/test"
 sys.path.append(lib_path)
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,9 @@ logger = logging.getLogger(__name__)
 import lib_simulation as LS
 
 #%% VARIABLES
-folder_name = "Braun2011_1609_fin_test_3" # name of the simulation 
+diff=1
+activity=0
+folder_name = f"Braun2011_diff_{str(diff)}_chem_{str(activity)}" # name of the simulation
 working_path = os.path.dirname(__file__)
 folder = working_path  + "/"+ folder_name
 
@@ -42,7 +44,7 @@ xl_A = -20
 # xl_B = -0.77
 xr_A = 0
 # xl_B = -16
-xl_B = -5
+xl_B = -6
 
 xr_B = xl_B+6
 
@@ -68,7 +70,7 @@ D_Mab = LS.Coefficient("D_Mab",0.001) # motors bound to (ab)
 
 D_Pa = LS.Coefficient("D_Pa",0.5) # motors bound to (a)
 D_Pb = LS.Coefficient("D_Pb",0.5) # motors bound to (b)
-D_Pab = LS.Coefficient("D_Pab",0.05) # passive bound to (ab) 
+D_Pab = LS.Coefficient("D_Pab",diff) # passive bound to (ab) diffusion
 
 V_Ma = LS.Coefficient("V_Ma",0)
 V_Mb = LS.Coefficient("V_Mb",0)
@@ -86,8 +88,8 @@ Koff_4_Mab = LS.Coefficient("Koff_4_Mab",30) # Rates of reaction 4 around Mab_eq
 
 Koff_5_Pa = LS.Coefficient("Koff_5_Pa",0) # Rates of reaction 1 around Ma_eq
 Koff_6_Pb = LS.Coefficient("Koff_6_Pb",0) # Rates of reaction 2 around Mb_eq
-Koff_7_Pab = LS.Coefficient("Koff_7_Pab",1) # Rates of reaction 3 around Mab_eq
-Koff_8_Pab = LS.Coefficient("Koff_8_Pab",1) # Rates of reaction 4 around Mab_eq
+Koff_7_Pab = LS.Coefficient("Koff_7_Pab",activity) # Rates of reaction 3 around Mab_eq activity
+Koff_8_Pab = LS.Coefficient("Koff_8_Pab",activity) # Rates of reaction 4 around Mab_eq activity
 
 
 eta = LS.Coefficient("eta",0) # Shear viscosity
