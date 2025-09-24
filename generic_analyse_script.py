@@ -35,13 +35,20 @@ import lib_simulation as LS
 #%%
 dir_local = os.path.dirname(__file__)
 
-name =    'Test_2208'
-dir_input_file = '/home/cedrik/Documents/filaments-crosslinkers-projects/Active_crosslinkers/'+name+'/'
+def commacolon(x):
+    if "." in str(x):
+        return str(x).replace('.',',')
+    else:
+        return str(x)
+diff=0.05
+activity=0
+name = f"Braun2011_diff_{commacolon(diff)}_chem_{commacolon(activity)}"
+dir_input_file = "/home/benji/PycharmProjects/FCI-ExplorationProject/"+name+'/'
 name_input_file = name+'_s1'
 extension_input_file = '.h5'
 
 dir_output_file = dir_local
-name_output_file = "21_07_output"
+name_output_file = f"output_{name}"
 
 
 bool_anim = 1
@@ -76,12 +83,12 @@ if bool_anim:
         if i%(N_end/100) == 0:
             print(i)
         plt.clf()    
-        plt.plot(x_tasks,tasks['n_D'][i],color = 'black',linestyle="-",label = r"$x_{D}$")
-        # plt.plot(x_tasks,tasks['n_D'][i]/(0.001+tasks['f_D'][i]),color = 'black',linestyle="-",label = r"$coeff$")
+        plt.plot(x_tasks,tasks['Pab'][i],color = 'black',linestyle="-",label = r"$x_{D}$")
+        # plt.plot(x_tasks,tasks['Pab'][i]/(0.001+tasks['f_D'][i]),color = 'black',linestyle="-",label = r"$coeff$")
 
         plt.plot(x_tasks,tasks['f_A'][i], color='blue',alpha = 0.5, label = r"$\phi^A$")
         plt.plot(x_tasks,tasks['f_B'][i], color='red',alpha = 0.5, label = r"$\phi^B$")
-        # plt.plot(x_tasks,tasks['f_D'][i]-tasks['n_D'][i], color='red',alpha = 0.5, label = r"$\phi^B$")
+        # plt.plot(x_tasks,tasks['f_D'][i]-tasks['Pab'][i], color='red',alpha = 0.5, label = r"$\phi^B$")
 
         plt.legend(loc='upper left')
     
@@ -90,7 +97,7 @@ if bool_anim:
     ani = FuncAnimation(fig, animate, frames=t,
                         interval=1, repeat=False)
     #name = "D"+str(D)+"a"+str(alpha)+".gif"
-    ani.save(dir_output_file+"/"+name_output_file+"_density"+extension_animation, writer = 'ffmpeg', fps = frame_per_second)
+    ani.save(dir_input_file+"/"+name_output_file+"_density"+extension_animation, writer = 'ffmpeg', fps = frame_per_second)
 
 
 
@@ -111,7 +118,7 @@ if bool_anim:
         
 #         # plt.plot(x_tasks,tasks['f_A'][i], color='blue',alpha = 0.5, label = r"$\phi^A$")
 #         # plt.plot(x_tasks,tasks['f_B'][i], color='red',alpha = 0.5, label = r"$\phi^B$")
-#         # plt.plot(x_tasks,tasks['f_D'][i]-tasks['n_D'][i], color='red',alpha = 0.5, label = r"$\phi^B$")
+#         # plt.plot(x_tasks,tasks['f_D'][i]-tasks['Pab'][i], color='red',alpha = 0.5, label = r"$\phi^B$")
 #         plt.ylim(-5000,5000)
 #         plt.legend(loc='upper left')
     
@@ -138,68 +145,68 @@ Vitesse_B = np.zeros(len(t_tasks))
 
 concentration = np.zeros(len(t_tasks))
 
-N_D = np.zeros(len(t_tasks))
-N_D_tot = np.zeros(len(t_tasks))
+Pab = np.zeros(len(t_tasks))
+Pab_tot = np.zeros(len(t_tasks))
 
 Overlap = np.zeros(len(t_tasks))
 
 
 for i in range(len(t_tasks)):
-    Force_ent_A[i] = tasks['F_fA_ent'][i][10]
+    Force_ent_A[i] = tasks['F_fA_ent'][i]
     # Force_visc_A[i] = tasks['F_fA_visc'][i][10]
     # Force_el_A[i] = tasks['F_fA_el'][i][10]
 
-    Force_ent_B[i] = tasks['F_fB_ent'][i][10]
-    concentration[i] = tasks['n_D'][i][int(len(x_tasks)/2)]
+    Force_ent_B[i] = tasks['F_fB_ent'][i]
+    concentration[i] = tasks['Pab'][i][int(len(x_tasks)/2)]
     
-    Vitesse_B[i] = tasks['V_B'][i][10]
-    N_D[i] = integrate.simpson(tasks['f_D'][i]*tasks['n_D'][i],x_tasks)
-    N_D_tot[i] = integrate.simpson(tasks['n_D'][i],x_tasks)
+    Vitesse_B[i] = tasks['V_B'][i]
+    Pab[i] = integrate.simpson(tasks['f_D'][i]*tasks['Pab'][i],x_tasks)
+    Pab_tot[i] = integrate.simpson(tasks['Pab'][i],x_tasks)
 
     Overlap[i] = integrate.simpson(tasks['f_D'][i],x_tasks)
 
 #%%
-rho = N_D/Overlap
-rho_tot = N_D_tot/Overlap
+rho = Pab/Overlap
+rho_tot = Pab_tot/Overlap
 
 #%%
 
 A = np.zeros((len(t_tasks),len(x_tasks),3))
 # for t in range(len(t_tasks)):
 #     print(t)
-#     A[t] = tasks['n_D'][t]
+#     A[t] = tasks['Pab'][t]
 #     for i in range(len(x_tasks)):
 #         if A[t][i]<=0.021:
 #             A[t][i] = -0.1*tasks['f_B'][t][i]
 
 #%%
-for t in range(len(tasks['n_D'])):
-    tasks['n_D'][t][tasks['n_D'][t]<=0] = 0
+for t in range(len(tasks['Pab'])):
+    tasks['Pab'][t][tasks['Pab'][t]<=0] = 0
     tasks['f_B'][t][tasks['f_B'][t]<=0] = 0
     tasks['f_A'][t][tasks['f_A'][t]<=0] = 0
 
 
 #%%
-A[:,:,1]= 0+0.8*tasks['n_D']/np.max(tasks['n_D'])     
+A[:,:,1]= 0+0.8*tasks['Pab']/np.max(tasks['Pab'])     
 A[:,:,0]= 0+0.5*tasks['f_B']/np.max(tasks['f_B']) + 0.3*tasks['f_A']/np.max(tasks['f_A'])    
 
  
 #%%
 plt.figure(dpi = 200,figsize= (4,6))
-# plt.pcolormesh(x_tasks,-t_tasks, tasks['n_D'])
+# plt.pcolormesh(x_tasks,-t_tasks, tasks['Pab'])
 plt.pcolormesh(x_tasks,t_tasks,A)
 plt.gca().invert_yaxis()
 plt.ylabel("time (min)")
-plt.xlabel("distance to template filament end ($\mu$m)")
-
+plt.xlabel("distance to template filament end (um)")
+plt.savefig(os.path.join(dir_input_file, f"{name_output_file}_heatmap.png"), dpi=200)
 plt.show()
 
 #%%
 plt.figure(dpi=200,figsize=(6,3))
 plt.rcParams['font.size'] = '14'
-plt.plot(x_tasks,tasks['n_D'][100],color=(0.0, 0.6, 0.0),label=r"$n^{(ab)}(t_1)$",linewidth=2.5)
-# plt.plot(x_tasks,tasks['n_D'][300],color=(0.0, 0.6, 0.0),label=r"$n^{(ab)}(t_1)$",linewidth=2.5)
-# plt.plot(x_tasks,tasks['n_D'][650],color=(0.0, 0.6, 0.0),label=r"$n^{(ab)}(t_1)$",linewidth=2.5)
+plt.plot(x_tasks,tasks['Pab'][100],color=(0.0, 0.6, 0.0),label=r"$n^{(ab)}(t_1)$",linewidth=2.5)
+# plt.plot(x_tasks,tasks['Pab'][300],color=(0.0, 0.6, 0.0),label=r"$n^{(ab)}(t_1)$",linewidth=2.5)
+# plt.plot(x_tasks,tasks['Pab'][650],color=(0.0, 0.6, 0.0),label=r"$n^{(ab)}(t_1)$",linewidth=2.5)
 
 plt.fill_between(x_tasks,tasks['f_A'][100],color="red",alpha=0.15)
 plt.fill_between(x_tasks,tasks['f_B'][100],color="red",alpha=0.15)
@@ -242,8 +249,8 @@ plt.show()
 
 #%%
 plt.figure(dpi=200)
-plt.plot(t_tasks,N_D,label = r"$N$")
-plt.plot(t_tasks,N_D_tot,label = r"$N_{tot}$")
+plt.plot(t_tasks,Pab,label = r"$N$")
+plt.plot(t_tasks,Pab_tot,label = r"$N_{tot}$")
 
 plt.plot(t_tasks,rho,label = r"$\rho$")
 plt.plot(t_tasks,rho_tot,label = r"$\rho_{tot}$")
@@ -272,12 +279,19 @@ plt.show()
 
 
 #%%import matplotlib.pyplot as plt
-img = plt.imread("fit_background.png")
-fig, ax = plt.subplots(dpi=200)
-ax.imshow(img, extent=[0, 1, 0, 1])
-ax.plot(2*rho_tot[ib:ie], 30*Vitesse_B[ib:ie])
-plt.xlim(-50,300)
-plt.ylim(-50,300)
+try:
+    img = plt.imread("fit_background.png")
+    fig, ax = plt.subplots(dpi=200)
+    ax.imshow(img, extent=[0, 1, 0, 1])
+    ax.plot(2*rho_tot[ib:ie], 30*Vitesse_B[ib:ie])
+    plt.xlim(-50,300)
+    plt.ylim(-50,300)
+except FileNotFoundError:
+    # Skip background plotting if the image is not available
+    fig, ax = plt.subplots(dpi=200)
+    ax.plot(2*rho_tot[ib:ie], 30*Vitesse_B[ib:ie])
+    plt.xlim(-50,300)
+    plt.ylim(-50,300)
 
 #%%
 plt.figure(dpi=200)
