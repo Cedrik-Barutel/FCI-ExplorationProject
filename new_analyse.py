@@ -24,7 +24,7 @@ import sys
 # local library
 dir_local = os.path.dirname(__file__)
 sys.path.append(dir_local)
-lib_path = "/home/cedrik/Documents/filaments-crosslinkers-projects/lib"
+lib_path = "/home/benji/PycharmProjects/FCI-ExplorationProject/test"
 sys.path.append(lib_path)
 
 
@@ -38,13 +38,20 @@ import lib_simulation as LS
 #%%
 dir_local = os.path.dirname(__file__)
 
-name =    "Braun2011_1609_test_k_0001_slide"
-dir_input_file = '/home/cedrik/Documents/filaments-crosslinkers-projects/Braun2011/'+name+'/'
+def commacolon(x):
+    if "." in str(x):
+        return str(x).replace('.',',')
+    else:
+        return str(x)
+diff=0.1
+activity=0
+name = f"Braun2011_diff_{commacolon(diff)}_chem_{commacolon(activity)}"
+dir_input_file = "/home/benji/PycharmProjects/FCI-ExplorationProject/"+name+'/'
 name_input_file = name+'_s1'
 extension_input_file = '.h5'
 
 dir_output_file = dir_local
-name_output_file = "output_test1"
+name_output_file = f"output_{name}"
 
 
 bool_anim = 1
