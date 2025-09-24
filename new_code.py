@@ -24,9 +24,14 @@ logger = logging.getLogger(__name__)
 import lib_simulation as LS
 
 #%% VARIABLES
-diff=1
+def commacolon(x):
+    if "." in str(x):
+        return str(x).replace('.',',')
+    else:
+        return str(x)
+diff=0.02
 activity=0
-folder_name = f"Braun2011_diff_{str(diff)}_chem_{str(activity)}" # name of the simulation
+folder_name = f"Braun2011_diff_{commacolon(diff)}_chem_{commacolon(activity)}" # name of the simulation
 working_path = os.path.dirname(__file__)
 folder = working_path  + "/"+ folder_name
 
