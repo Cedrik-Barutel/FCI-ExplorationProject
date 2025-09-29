@@ -270,7 +270,7 @@ plt.show()
 #%%
 x=np.linspace(0,5,50)
 plt.figure(dpi=200,figsize=(8,8))
-E = 0.79
+E = 0.79 #todo 0.95 'number of particles staying in overlap'
 plt.title("Sweeping efficiency = "+str(E))
 plt.plot(Overlap[1]/Overlap,(N_Pab/Overlap)/(N_Pab[1]/Overlap[1]),linewidth=3)
 plt.plot(Overlap[1]/Overlap,np.power(Overlap[1]/Overlap,E))

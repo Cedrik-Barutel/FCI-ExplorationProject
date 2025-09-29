@@ -42,7 +42,7 @@ xl_A = -20
 # xl_B = -0.77
 xr_A = 0
 # xl_B = -16
-xl_B = -5
+xl_B = -6
 
 xr_B = xl_B+6
 
