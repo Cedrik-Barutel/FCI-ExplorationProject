@@ -29,7 +29,7 @@ working_path = os.path.dirname(__file__)
 folder = working_path  + "/"+ folder_name
 
 N_save = 200 # number of save
-timestep = 1e-3 #timestep
+timestep = 5e-4 #timestep
 stop_time = 5*60 # max simulating time 
 Lx = 20 #length of the simulation box
 Nx = 2**8
@@ -61,9 +61,9 @@ V_0 = LS.Coefficient("V_0",l_0.v/t_0.v)
 
 
 Dam1 = LS.Coefficient("Dam1",0) # always zero in our case
-Dam2 = LS.Coefficient("Dam2",40) # DAMKOHLER NUMBER # we choose
+Dam2 = LS.Coefficient("Dam2",20) # DAMKOHLER NUMBER # we choose
 
-Pe1 = LS.Coefficient("Pe1",0.1) # PECLET NUMBER # we choose
+Pe1 = LS.Coefficient("Pe1",1) # PECLET NUMBER # we choose
 Pe2 = LS.Coefficient("Pe2",0) # always zero
 
 
@@ -84,7 +84,8 @@ Koff_7_Pab = LS.Coefficient("Koff_7_Pab",Dam2.v*k_0.v/D_0.v*D_Pab.v) # Rates of 
 Koff_8_Pab = LS.Coefficient("Koff_8_Pab",Dam2.v*k_0.v/D_0.v*D_Pab.v) # Rates of reaction 4 around Mab_eq
 
 
-stop_time = -4/(v_A.v)
+# I set stop_time so the overlap goes from 5 to 1. If stop_time is too big, I limit to 5*60.
+stop_time = -2/(v_A.v)
 if stop_time>= 5*60:
     stop_time = 5*60
 
