@@ -28,11 +28,11 @@ def commacolon(x):
 
 def run_sweeping_eff(diff, activity):
 
-    name = f"Braun2011_diff_{commacolon(diff)}_chem_{commacolon(activity)}"
+    name = f"Nondimensional_diff_{commacolon(diff)}_koff_{commacolon(activity)}"
     name_input_file = name+'_s1'
     extension_input_file = '.h5'
     working_path = os.path.dirname(__file__)
-    folder = f"{working_path}/test/{name}"
+    folder = f"{working_path}/test_nondim/{name}"
     dir_input_file = f"{folder}/"
     dir_output_file = folder
     name_output_file = f"output_{name}"
@@ -109,20 +109,29 @@ def run_sweeping_eff(diff, activity):
     y = (N_Pab[ib:ie]/Overlap[ib:ie])/(N_Pab[ib]/Overlap[ib])
     popt2, pcov2 =scipy.optimize.curve_fit(func_power, x, y)
 
-    plt.figure(dpi=200,figsize=(8,8))
+    plt.figure(dpi=200, figsize=(8, 8))
     sweeping_eff = popt2[0]
-    plt.title(f"Sweeping efficiency = {str(sweeping_eff)}")
-    plt.plot(Overlap[ib]/Overlap[ib:ie],(N_Pab[ib:ie]/Overlap[ib:ie])/(N_Pab[ib]/Overlap[ib]),linewidth=3, label='Data')
 
-    plt.plot(x, func_power(x, popt2[0]), label=f'Fit: $x^{{{sweeping_eff:.3f}}}$')
+    plt.plot(Overlap[ib] / Overlap[ib:ie], (N_Pab[ib:ie] / Overlap[ib:ie]) / (N_Pab[ib] / Overlap[ib]), linewidth=3,
+             label='Data', color='blue')
+    plt.plot(x, func_power(x, popt2[0]), label=f'Fit: $x^{{{sweeping_eff:.3f}}}$', color='cyan', linestyle='--')
+
+    # Add derivative to the same plot
+    derivative_values = popt2[0] * np.power(x, popt2[0] - 1)
+    derivative_fit = np.mean(derivative_values)
+    plt.plot(x, derivative_values, linewidth=2, label=f"Derivative (mean={derivative_fit:.3f})", color='red',
+             linestyle='-.')
+
     plt.xlabel('Normalized L_ov')
     plt.ylabel('Normalized N_Pab/L_ov')
     plt.legend()
     plt.xscale('log')
     plt.yscale('log')
+    plt.title(f"Sweeping efficiency = {sweeping_eff:.3f} | Mean derivative = {derivative_fit:.3f}")
+    plt.tight_layout()
+    plt.savefig(os.path.join(dir_input_file, f"{name_output_file}_results.png"), dpi=200)
     plt.show()
 
-    plt.savefig(os.path.join(dir_input_file, f"{name_output_file}_sweeping_eff.png"), dpi=200)
     # Calculate the mean derivative of the fit across all data points
     # Derivative of x^E is E * x^(E-1)
     derivative_fit = np.mean(popt2[0] * np.power(x, popt2[0] - 1))
@@ -133,5 +142,5 @@ def run_sweeping_eff(diff, activity):
         'sweeping efficiency': [sweeping_eff],
         'derivative_fit': [derivative_fit]
     })
-    df.to_csv(os.path.join(dir_input_file, f"{name_output_file}_sweeping_eff.csv"))
+    df.to_csv(os.path.join(dir_input_file, f"{name_output_file}_results.csv"))
     return

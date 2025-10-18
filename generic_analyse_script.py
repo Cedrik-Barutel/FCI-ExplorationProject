@@ -45,9 +45,9 @@ def run_analysis(diff: float, activity: float, bool_anim: bool = True, plots: bo
         else:
             return str(x)
 
-    name = f"Braun2011_diff_{commacolon(diff)}_chem_{commacolon(activity)}"
+    name = f"Nondimensional_diff_{commacolon(diff)}_koff_{commacolon(activity)}"
     cwd = os.getcwd()
-    dir_input_file = f"{cwd}/test/{name}/"
+    dir_input_file = f"{cwd}/test_nondim/{name}/"
     name_input_file = name + '_s1'
     extension_input_file = '.h5'
 
@@ -118,120 +118,15 @@ def run_analysis(diff: float, activity: float, bool_anim: bool = True, plots: bo
     A[:, :, 1] = 0 + 0.8 * tasks['Pab'] / np.max(tasks['Pab'])
     A[:, :, 0] = 0 + 0.5 * tasks['f_B'] / np.max(tasks['f_B']) + 0.3 * tasks['f_A'] / np.max(tasks['f_A'])
 
-    # Save only the key heatmap; avoid interactive show
+    # Save only the key kymograph; avoid interactive show
     fig_h = plt.figure(dpi=200, figsize=(4, 6))
     plt.pcolormesh(x_tasks, t_tasks, A)
     plt.gca().invert_yaxis()
     plt.ylabel("time (min)")
     plt.xlabel("distance to template filament end (um)")
     os.makedirs(dir_input_file, exist_ok=True)
-    plt.savefig(os.path.join(dir_input_file, f"{name_output_file}_heatmap.png"), dpi=200)
+    plt.savefig(os.path.join(dir_input_file, f"{name_output_file}_kymograph.png"), dpi=200)
 
-    '''
-    plt.figure(dpi=200, figsize=(6, 3))
-    plt.rcParams['font.size'] = '14'
-    idx = min(100, len(t_tasks)-1)
-    plt.plot(x_tasks, tasks['Pab'][idx], color=(0.0, 0.6, 0.0), label=r"$n^{(ab)}(t_1)$", linewidth=2.5)
-    plt.fill_between(x_tasks, tasks['f_A'][idx], color="red", alpha=0.15)
-    plt.fill_between(x_tasks, tasks['f_B'][idx], color="red", alpha=0.15)
-    plt.gca().spines['left'].set_linewidth(2)
-    plt.gca().spines['top'].set_visible(False)
-    plt.gca().spines['right'].set_visible(False)
-    plt.gca().spines['bottom'].set_linewidth(2)
-    plt.hlines(0.59,-27,6,color="black",linestyles="--")
-    plt.ylim(-0.02,1.02)
-    plt.xlim(-22,5.5)
-    plt.show()
-
-    ib = 0
-    ie = -1
-    plt.figure(dpi=200)
-    plt.plot(t_tasks[ib:ie], Vitesse_B[ib:ie], label=r"$V(t)$")
-    plt.legend()
-    plt.show()
-
-    plt.figure(dpi=200)
-    plt.plot(t_tasks[ib:ie], Overlap[ib:ie], label=r"$Overlap(t)$")
-    plt.legend()
-    plt.show()
-
-    plt.figure(dpi=200)
-    plt.plot(t_tasks, Pab, label=r"$N$")
-    plt.plot(t_tasks, Pab_tot, label=r"$N_{tot}$")
-    plt.plot(t_tasks, rho, label=r"$\rho$")
-    plt.plot(t_tasks, rho_tot, label=r"$\rho_{tot}$")
-    plt.legend()
-    plt.show()
-
-    plt.figure(dpi=200)
-    plt.plot(rho[ib:ie], Vitesse_B[ib:ie], label="rho")
-    plt.plot(rho_tot[ib:ie], Vitesse_B[ib:ie], label="rho_tot")
-    plt.legend()
-    plt.show()
-
-    try:
-        img = plt.imread("fit_background.png")
-        fig, ax = plt.subplots(dpi=200)
-        ax.imshow(img, extent=[0, 1, 0, 1])
-        ax.plot(2*rho_tot[ib:ie], 30*Vitesse_B[ib:ie])
-        plt.xlim(-50,300)
-        plt.ylim(-50,300)
-    except FileNotFoundError:
-        fig, ax = plt.subplots(dpi=200)
-        ax.plot(2*rho_tot[ib:ie], 30*Vitesse_B[ib:ie])
-        plt.xlim(-50,300)
-        plt.ylim(-50,300)
-
-    plt.figure(dpi=200)
-    base = max(2, ib)
-    plt.plot(Overlap[base]/Overlap[ib:ie], rho[ib:ie]/rho[base], label="rho")
-    plt.plot(Overlap[base]/Overlap[ib:ie], rho_tot[ib:ie]/rho_tot[base], label="rho_tot")
-    plt.legend()
-    plt.show()
-
-    plt.figure(dpi=200)
-    plt.plot(t_tasks[ib:ie], Overlap[ib:ie]/Overlap[base], label="rho")
-    plt.legend()
-    plt.show()
-
-    def func_fit(x, a, b):
-        return a * x + b
-
-    popt, pcov = curve_fit(func_fit, rho[ib:ie], Vitesse_B[ib:ie])
-
-    plt.figure(dpi=200)
-    plt.plot(rho[ib:ie], Vitesse_B[ib:ie], label="rho")
-    plt.plot(rho[ib:ie], func_fit(rho[ib:ie], popt[0], popt[1]), label="rho_fit")
-    plt.legend()
-    plt.plot()
-
-    plt.figure(dpi=200)
-    plt.plot(Vitesse_B[ib:ie], rho[ib:ie], label="rho")
-    plt.plot(Vitesse_B[ib:ie], (Vitesse_B[ib:ie]-popt[1])/popt[0], label="rho_fit")
-    plt.legend()
-    plt.plot()
-
-    plt.figure(dpi=200)
-    plt.plot(t_tasks[ib:ie], rho[ib:ie], label="rho")
-    plt.plot(t_tasks[ib:ie], (Vitesse_B[ib:ie]-popt[1])/popt[0], label="rho_fit")
-    plt.legend()
-    plt.plot()
-
-    plt.figure(dpi=200)
-    plt.plot(Overlap[ib]/Overlap[ib:ie], rho[ib:ie]/rho[ib], label="rho")
-    plt.legend()
-    plt.show()
-
-    plt.figure(dpi=200)
-    plt.plot(Overlap[ib]/Overlap[ib:ie], Vitesse_B[ib:ie], label="rho")
-    plt.legend()
-    plt.show()
-
-    plt.figure(dpi=200)
-    plt.plot(t_tasks[ib:ie], Overlap[ib:ie]/Overlap[ib], label="rho")
-    plt.legend()
-    plt.show()
-    '''
     if plots:
         # optional display only when requested
         pass

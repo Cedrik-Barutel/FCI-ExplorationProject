@@ -18,7 +18,7 @@ def nondimensional(diff: float, activity: float, debug_plots: bool = False):
     # VARIABLES
     folder_name = f"Nondimensional_diff_{commacolon(diff)}_koff_{commacolon(activity)}"
     working_path = os.path.dirname(__file__)
-    folder = f"{working_path}/test/{folder_name}"
+    folder = f"{working_path}/test_nondim/{folder_name}"
     Dam = activity/diff
     N_save = 200  # number of save steps
     timestep = 5e-4  # timestep
@@ -346,3 +346,9 @@ def nondimensional(diff: float, activity: float, debug_plots: bool = False):
         pass
 
     return h5_path
+
+def main(diff,activity):
+    nondimensional(diff, activity)
+
+if __name__ == "__main__":
+    main()

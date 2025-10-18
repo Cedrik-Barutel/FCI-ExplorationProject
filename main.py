@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from non_dimensoinal_simulation import run_simulation as simulation
+from dimensionsless import nondimensional as simulation
 from generic_analyse_script import run_analysis as analyse  # call analysis without animations
 from new_analyse_update_290925 import run_sweeping_eff
 import gc
@@ -68,7 +68,7 @@ def auto_analysis():
 
 def create_results():
     cwd = os.getcwd()
-    test_dir = f"{cwd}/test/"
+    test_dir = f"{cwd}/test_nondim/"
     results_df = pd.DataFrame()
     for folder in os.listdir(test_dir):
         folder_path = os.path.join(test_dir, folder)
@@ -76,7 +76,7 @@ def create_results():
         if not os.path.isdir(folder_path):
             continue
         for file in os.listdir(folder_path):
-            if "sweeping_eff.csv" in file:
+            if "results.csv" in file:
                 df = pd.read_csv(os.path.join(folder_path, file))
                 df = df.drop(df.columns[0], axis=1)
                 results_df = pd.concat([results_df, df])
@@ -110,7 +110,7 @@ def create_results():
     ax.set_ylabel('k_off')
     ax.set_title('Sweeping Efficiency')
     plt.tight_layout()
-    plt.savefig(f"test/sweeping_eff.png")
+    plt.savefig(f"test_nondim/sweeping_eff.png")
     plt.show()
 
     # Pivot the dataframe for derivative_fit
@@ -131,11 +131,11 @@ def create_results():
     ax2.set_ylabel('k_off')
     ax2.set_title('Derivative of Fit')
     plt.tight_layout()
-    plt.savefig(f"test/derivative_fit.png")
+    plt.savefig(f"test_nondim/derivative_fit.png")
     plt.show()
     return
 
 if __name__ == "__main__":
-    #auto_simulation()
+    auto_simulation()
     auto_analysis()
-    #create_results()
+    create_results()
