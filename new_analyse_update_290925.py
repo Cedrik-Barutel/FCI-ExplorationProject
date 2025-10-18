@@ -99,14 +99,6 @@ def run_sweeping_eff(diff, activity):
     A[:,:,1]= 0+0.8*tasks['Pab']/np.max(tasks['Pab'])
     A[:,:,0]= 0+0.5*tasks['f_B']/np.max(tasks['f_B']) + 0.3*tasks['f_A']/np.max(tasks['f_A'])
 
-    """
-    FROM HERE I AM TESTING STUFF
-    """
-
-    def func_linear(x,E):
-        return E*x
-
-
     def func_power(x,E):
         return np.power(x,E)
 
@@ -120,18 +112,26 @@ def run_sweeping_eff(diff, activity):
     plt.figure(dpi=200,figsize=(8,8))
     sweeping_eff = popt2[0]
     plt.title(f"Sweeping efficiency = {str(sweeping_eff)}")
-    plt.plot(Overlap[ib]/Overlap[ib:ie],(N_Pab[ib:ie]/Overlap[ib:ie])/(N_Pab[ib]/Overlap[ib]),linewidth=3)
+    plt.plot(Overlap[ib]/Overlap[ib:ie],(N_Pab[ib:ie]/Overlap[ib:ie])/(N_Pab[ib]/Overlap[ib]),linewidth=3, label='Data')
 
-    plt.plot(x,func_power(x,popt2[0]))
-
+    plt.plot(x, func_power(x, popt2[0]), label=f'Fit: $x^{{{sweeping_eff:.3f}}}$')
+    plt.xlabel('Normalized L_ov')
+    plt.ylabel('Normalized N_Pab/L_ov')
+    plt.legend()
     plt.xscale('log')
     plt.yscale('log')
     plt.show()
 
     plt.savefig(os.path.join(dir_input_file, f"{name_output_file}_sweeping_eff.png"), dpi=200)
-    df = pd.DataFrame({'diffusion':[diff],'k_off':[activity],'sweeping efficiency':[sweeping_eff]})
+    # Calculate the mean derivative of the fit across all data points
+    # Derivative of x^E is E * x^(E-1)
+    derivative_fit = np.mean(popt2[0] * np.power(x, popt2[0] - 1))
+
+    df = pd.DataFrame({
+        'diffusion': [diff],
+        'k_off': [activity],
+        'sweeping efficiency': [sweeping_eff],
+        'derivative_fit': [derivative_fit]
+    })
     df.to_csv(os.path.join(dir_input_file, f"{name_output_file}_sweeping_eff.csv"))
     return
-
-#%%
-#%%

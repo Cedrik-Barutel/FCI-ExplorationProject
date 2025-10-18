@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from new_code import run_simulation as simulation
+from non_dimensoinal_simulation import run_simulation as simulation
 from generic_analyse_script import run_analysis as analyse  # call analysis without animations
 from new_analyse_update_290925 import run_sweeping_eff
 import gc
@@ -65,21 +65,34 @@ def auto_analysis():
         plt.close('all')
         gc.collect()
 
+
 def create_results():
     cwd = os.getcwd()
     test_dir = f"{cwd}/test/"
     results_df = pd.DataFrame()
     for folder in os.listdir(test_dir):
-        for file in os.listdir(test_dir+folder):
+        folder_path = os.path.join(test_dir, folder)
+        # Skip if it's not a directory
+        if not os.path.isdir(folder_path):
+            continue
+        for file in os.listdir(folder_path):
             if "sweeping_eff.csv" in file:
-                df = pd.read_csv(test_dir+folder+"/"+file)
+                df = pd.read_csv(os.path.join(folder_path, file))
                 df = df.drop(df.columns[0], axis=1)
                 results_df = pd.concat([results_df, df])
             else:
                 continue
     # Drop rows with specific diffusion values
     results_df = results_df[~results_df['diffusion'].isin([0.03, 0.05, 0.1])]
-    # Pivot the dataframe
+
+    # Print to check the data
+    print("Results DataFrame:")
+    print(results_df.head())
+    print("\nSweeping efficiency range:", results_df['sweeping efficiency'].min(), "-",
+          results_df['sweeping efficiency'].max())
+    print("Derivative fit range:", results_df['derivative_fit'].min(), "-", results_df['derivative_fit'].max())
+
+    # Pivot the dataframe for sweeping efficiency
     pivot_df = results_df.pivot(index='k_off', columns='diffusion', values='sweeping efficiency')
 
     # Create the plot with square cells
@@ -97,11 +110,32 @@ def create_results():
     ax.set_ylabel('k_off')
     ax.set_title('Sweeping Efficiency')
     plt.tight_layout()
+    plt.savefig(f"test/sweeping_eff.png")
     plt.show()
-    plt.savefig(f"results/sweeping_eff.png")
+
+    # Pivot the dataframe for derivative_fit
+    pivot_df_derivative = results_df.pivot(index='k_off', columns='diffusion', values='derivative_fit')
+
+    # Create the plot for derivative_fit with potentially different colormap
+    fig2, ax2 = plt.subplots(figsize=(8, 8), dpi=200)
+    im2 = ax2.imshow(pivot_df_derivative.values, aspect='auto', cmap='viridis', origin='lower')
+    plt.colorbar(im2, label='Derivative of Fit')
+
+    # Set tick labels to actual values
+    ax2.set_xticks(np.arange(len(pivot_df_derivative.columns)))
+    ax2.set_xticklabels(pivot_df_derivative.columns)
+    ax2.set_yticks(np.arange(len(pivot_df_derivative.index)))
+    ax2.set_yticklabels(pivot_df_derivative.index)
+
+    ax2.set_xlabel('Diffusion')
+    ax2.set_ylabel('k_off')
+    ax2.set_title('Derivative of Fit')
+    plt.tight_layout()
+    plt.savefig(f"test/derivative_fit.png")
+    plt.show()
     return
 
 if __name__ == "__main__":
-    auto_simulation()
+    #auto_simulation()
     auto_analysis()
-    create_results()
+    #create_results()

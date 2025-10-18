@@ -47,3 +47,4 @@ diffusion,activity,done
 0.5,0.005,True
 0.3,0.005,True
 0.02,0.005,True
+0.02,0.002,True

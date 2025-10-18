@@ -1,2 +1,2 @@
-,diffusion,k_off,sweeping efficiency
-0,1.0,5.0,0.20856413668785745
+,diffusion,k_off,sweeping efficiency,derivative_fit
+0,1.0,5.0,0.20856413668785745,0.13211568940613494
