@@ -1,9 +1,9 @@
 # IMPORT
-import numpy as np
 import matplotlib.pyplot as plt
 import dedalus.public as d3
 import datetime
 import logging
+import numpy as np
 import os
 import csv
 import lib_simulation as LS
@@ -217,7 +217,7 @@ def nondimensional(diff: float, activity: float, debug_plots: bool = False):
                       Pa_eq_5, Pb_eq_6, Pab_eq_7, Pab_eq_8,
                       V_A, V_B,
                       ],
-                     namespace=locals())  # Declaration of the problem variables
+                     namespace={**locals(), 'np': np, 'd3': d3})  # Declaration of the problem variables
 
     # - Cahn Hillard equation for the filaments - #
     problem.add_equation("dt(f_A) +D_f*ddx(-2*f_A +G_f*ddx(f_A)) = D_f*ddx(4*(f_A)**3-6*(f_A)**2) -dx(f_A*V_A)")
