@@ -26,7 +26,7 @@ def nondimensional(diff: float, activity: float, debug_plots: bool = False):
     Lx = 20  # length of the simulation box
     Nx = 2 ** 8
 
-    'Dimensions of the filaments'
+    # Dimensions of the filaments
     # position of the filaments
     xl_A = -7
     xr_A = 3

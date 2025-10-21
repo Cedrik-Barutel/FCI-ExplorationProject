@@ -98,8 +98,12 @@ def run_analysis(diff: float, activity: float, bool_anim: bool = True, plots: bo
     Overlap = np.zeros(len(t_tasks))
 
     for i in range(len(t_tasks)):
-        Force_ent_A[i] = tasks['F_fA_ent'][i]
-        Force_ent_B[i] = tasks['F_fB_ent'][i]
+        try:
+            Force_ent_A[i] = tasks['F_fA_ent'][i]
+            Force_ent_B[i] = tasks['F_fB_ent'][i]
+        except:
+            Force_ent_A[i] = np.nan
+            Force_ent_B[i] = np.nan
         concentration[i] = tasks['Pab'][i][int(len(x_tasks) / 2)]
         Vitesse_B[i] = tasks['V_B'][i]
         Pab[i] = integrate.simpson(tasks['f_D'][i] * tasks['Pab'][i], x_tasks)

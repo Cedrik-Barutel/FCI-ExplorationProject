@@ -26,16 +26,13 @@ def auto_simulation():
 
         # Run simulation
         h5_path = simulation(diff, act)
-
+        plan.at[idx, "done"] = True
+        plan.to_csv(plan_path, index=False)
         try:
             analyse(diff, act, bool_anim=True)
         except TypeError:
             # Fallback if signature differs
             analyse(diff, act)
-
-        # Mark as done and persist after each row
-        plan.at[idx, "done"] = True
-        plan.to_csv(plan_path, index=False)
 
         # Free memory between runs
         plt.close('all')
@@ -68,7 +65,7 @@ def auto_analysis():
 
 def create_results():
     cwd = os.getcwd()
-    test_dir = f"{cwd}/test_nondim/"
+    test_dir = f"{cwd}/test/"
     results_df = pd.DataFrame()
     for folder in os.listdir(test_dir):
         folder_path = os.path.join(test_dir, folder)
@@ -110,7 +107,7 @@ def create_results():
     ax.set_ylabel('k_off')
     ax.set_title('Sweeping Efficiency')
     plt.tight_layout()
-    plt.savefig(f"test_nondim/sweeping_eff.png")
+    plt.savefig(f"test/sweeping_eff.png")
     plt.show()
 
     # Pivot the dataframe for derivative_fit
@@ -131,11 +128,34 @@ def create_results():
     ax2.set_ylabel('k_off')
     ax2.set_title('Derivative of Fit')
     plt.tight_layout()
-    plt.savefig(f"test_nondim/derivative_fit.png")
+    plt.savefig(f"test/derivative_fit.png")
     plt.show()
+    '''
+    results_df['Dam'] = results_df['k_off'] / results_df['diffusion']
+    result_df = results_df.drop_duplicates(subset=['Dam'])
+    result_df = result_df.sort_values(by='Dam', ascending=True)
+
+    plt.figure(figsize=(8, 5))
+
+    # y1: sweeping_efficiency
+    plt.plot(result_df['Dam'], result_df['sweeping efficiency'], label='Sweeping Efficiency', marker='o')
+
+    # y2: derivative_fit
+    plt.plot(result_df['Dam'], result_df['derivative_fit'], label='Derivative Fit', marker='s')
+
+    plt.xscale('log')
+    plt.xlabel('Damköhler Number')
+    plt.ylabel('Value')
+    plt.title('Sweeping Efficiency and Derivative Fit vs Damköhler Number')
+
+    plt.legend()
+    plt.grid(True)
+    plt.savefig("test_nondim/sweeping_eff_dam.png", dpi=300, bbox_inches='tight')
+    plt.show()
+    '''
     return
 
 if __name__ == "__main__":
-    auto_simulation()
+    #auto_simulation()
     auto_analysis()
     create_results()

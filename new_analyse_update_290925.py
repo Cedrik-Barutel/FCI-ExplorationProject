@@ -28,11 +28,11 @@ def commacolon(x):
 
 def run_sweeping_eff(diff, activity):
 
-    name = f"Nondimensional_diff_{commacolon(diff)}_koff_{commacolon(activity)}"
+    name = f"Braun2011_diff_{commacolon(diff)}_chem_{commacolon(activity)}"
     name_input_file = name+'_s1'
     extension_input_file = '.h5'
     working_path = os.path.dirname(__file__)
-    folder = f"{working_path}/test_nondim/{name}"
+    folder = f"{working_path}/test/{name}"
     dir_input_file = f"{folder}/"
     dir_output_file = folder
     name_output_file = f"output_{name}"
@@ -99,37 +99,87 @@ def run_sweeping_eff(diff, activity):
     A[:,:,1]= 0+0.8*tasks['Pab']/np.max(tasks['Pab'])
     A[:,:,0]= 0+0.5*tasks['f_B']/np.max(tasks['f_B']) + 0.3*tasks['f_A']/np.max(tasks['f_A'])
 
-    def func_power(x,E):
-        return np.power(x,E)
+    def func_power(x, E):
+        return np.power(x, E)
 
-    ib = 1 # first point
-    ie = 50 # last point
+    ib = 1  # first point
+    ie = 50  # last point
 
-    x = Overlap[ib]/Overlap[ib:ie]
-    y = (N_Pab[ib:ie]/Overlap[ib:ie])/(N_Pab[ib]/Overlap[ib])
-    popt2, pcov2 =scipy.optimize.curve_fit(func_power, x, y)
+    x = Overlap[ib] / Overlap[ib:ie]
+    y = (N_Pab[ib:ie] / Overlap[ib:ie]) / (N_Pab[ib] / Overlap[ib])
 
-    plt.figure(dpi=200, figsize=(8, 8))
+    # Filter invalid values (inf, -inf, nan)
+    valid_mask = np.isfinite(x) & np.isfinite(y) & (x > 0) & (y > 0)
+    x_valid = x[valid_mask]
+    y_valid = y[valid_mask]
+
+    if len(x_valid) < 3:
+        print(f"Warning: Not enough valid data points for fitting (diff={diff}, activity={activity})")
+        print(f"  Valid points: {len(x_valid)}, Total points: {len(x)}")
+        print(f"  Overlap[ib]={Overlap[ib]}, N_Pab[ib]={N_Pab[ib]}")
+        return
+
+    # Fit power law
+    popt2, pcov2 = scipy.optimize.curve_fit(func_power, x_valid, y_valid)
     sweeping_eff = popt2[0]
 
-    plt.plot(Overlap[ib] / Overlap[ib:ie], (N_Pab[ib:ie] / Overlap[ib:ie]) / (N_Pab[ib] / Overlap[ib]), linewidth=3,
-             label='Data', color='blue')
-    plt.plot(x, func_power(x, popt2[0]), label=f'Fit: $x^{{{sweeping_eff:.3f}}}$', color='cyan', linestyle='--')
-
-    # Add derivative to the same plot
-    derivative_values = popt2[0] * np.power(x, popt2[0] - 1)
+    # Compute derivative
+    derivative_values = sweeping_eff * np.power(x, sweeping_eff - 1)
     derivative_fit = np.mean(derivative_values)
-    plt.plot(x, derivative_values, linewidth=2, label=f"Derivative (mean={derivative_fit:.3f})", color='red',
-             linestyle='-.')
 
-    plt.xlabel('Normalized L_ov')
-    plt.ylabel('Normalized N_Pab/L_ov')
-    plt.legend()
-    plt.xscale('log')
-    plt.yscale('log')
+    # Create figure and twin axes
+    fig, ax1 = plt.subplots(dpi=200, figsize=(8, 8))
+    ax2 = ax1.twinx()
+
+    # Left y-axis (data + fit)
+    ax1.plot(
+        Overlap[ib] / Overlap[ib:ie],
+        (N_Pab[ib:ie] / Overlap[ib:ie]) / (N_Pab[ib] / Overlap[ib]),
+        linewidth=3,
+        label='Data',
+        color='blue'
+    )
+    ax1.plot(
+        x,
+        func_power(x, sweeping_eff),
+        label=f'Fit: $x^{{{sweeping_eff:.3f}}}$',
+        color='cyan',
+        linestyle='--'
+    )
+
+    # Right y-axis (derivative)
+    ax2.plot(
+        x,
+        derivative_values,
+        linewidth=2,
+        label=f"Derivative (mean={derivative_fit:.3f})",
+        color='red',
+        linestyle='-.'
+    )
+
+    # Axis labels and scales
+    ax1.set_xlabel('Normalized L_ov')
+    ax1.set_ylabel('Normalized N_Pab/L_ov', color='blue')
+    ax2.set_ylabel('Derivative', color='red')
+
+    ax1.set_xscale('log')
+    ax1.set_yscale('log')
+    ax2.set_yscale('log')
+    ax2.invert_yaxis()
+    # Title and grid
     plt.title(f"Sweeping efficiency = {sweeping_eff:.3f} | Mean derivative = {derivative_fit:.3f}")
+    ax1.grid(True, which='both', ls='--')
+
+    # Combine legends from both axes
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc='best')
+
     plt.tight_layout()
-    plt.savefig(os.path.join(dir_input_file, f"{name_output_file}_results.png"), dpi=200)
+
+    # Save figure
+    os.makedirs(dir_input_file, exist_ok=True)
+    fig.savefig(os.path.join(dir_input_file, f"{name_output_file}_results.png"), dpi=200, bbox_inches='tight')
     plt.show()
 
     # Calculate the mean derivative of the fit across all data points
