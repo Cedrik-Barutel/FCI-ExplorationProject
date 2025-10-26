@@ -9,14 +9,8 @@ Created on Tue Mar 25 10:18:43 2025
 import numpy as np
 import matplotlib.pyplot as plt
 import dedalus.public as d3
-import datetime
 from matplotlib.animation import FuncAnimation
-import scipy
-from scipy.optimize import curve_fit
-# from scipy.differentiate import derivative
 from scipy import integrate
-import pandas as pd
-import scipy as scipy
 import logging
 import os
 import sys
@@ -45,9 +39,9 @@ def run_analysis(diff: float, activity: float, bool_anim: bool = True, plots: bo
         else:
             return str(x)
 
-    name = f"Nondimensional_diff_{commacolon(diff)}_koff_{commacolon(activity)}"
+    name = f"Braun2011_diff_{commacolon(diff)}_chem_{commacolon(activity)}"
     cwd = os.getcwd()
-    dir_input_file = f"{cwd}/test_nondim/{name}/"
+    dir_input_file = f"{cwd}/test/{name}/"
     name_input_file = name + '_s1'
     extension_input_file = '.h5'
 

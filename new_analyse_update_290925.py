@@ -105,6 +105,17 @@ def run_sweeping_eff(diff, activity):
     ib = 1  # first point
     ie = 50  # last point
 
+    if len(t_tasks) < ie:
+        df = pd.DataFrame({
+            'diffusion': [diff],
+            'k_off': [activity],
+            'sweeping efficiency': [pd.NA],
+            'derivative_fit': [pd.NA]
+        })
+        df.to_csv(os.path.join(dir_input_file, f"{name_output_file}_results.csv"))
+        return
+
+
     x = Overlap[ib] / Overlap[ib:ie]
     y = (N_Pab[ib:ie] / Overlap[ib:ie]) / (N_Pab[ib] / Overlap[ib])
 
@@ -112,13 +123,23 @@ def run_sweeping_eff(diff, activity):
     valid_mask = np.isfinite(x) & np.isfinite(y) & (x > 0) & (y > 0)
     x_valid = x[valid_mask]
     y_valid = y[valid_mask]
-
-    if len(x_valid) < 3:
+    if len(x_valid) < 49:
         print(f"Warning: Not enough valid data points for fitting (diff={diff}, activity={activity})")
         print(f"  Valid points: {len(x_valid)}, Total points: {len(x)}")
         print(f"  Overlap[ib]={Overlap[ib]}, N_Pab[ib]={N_Pab[ib]}")
+        df = pd.DataFrame({
+            'diffusion': [diff],
+            'k_off': [activity],
+            'sweeping efficiency': [pd.NA],
+            'derivative_fit': [pd.NA]
+        })
+        df.to_csv(os.path.join(dir_input_file, f"{name_output_file}_results.csv"))
         return
 
+    else:
+        print(f"Fitting (diff={diff}, activity={activity})")
+        print(f"  Valid points: {len(x_valid)}, Total points: {len(x)}")
+        print(f"  Overlap[ib]={Overlap[ib]}, N_Pab[ib]={N_Pab[ib]}")
     # Fit power law
     popt2, pcov2 = scipy.optimize.curve_fit(func_power, x_valid, y_valid)
     sweeping_eff = popt2[0]
@@ -127,57 +148,55 @@ def run_sweeping_eff(diff, activity):
     derivative_values = sweeping_eff * np.power(x, sweeping_eff - 1)
     derivative_fit = np.mean(derivative_values)
 
-    # Create figure and twin axes
     fig, ax1 = plt.subplots(dpi=200, figsize=(8, 8))
-    ax2 = ax1.twinx()
 
-    # Left y-axis (data + fit)
+    # Plot data + fit on primary y-axis
     ax1.plot(
         Overlap[ib] / Overlap[ib:ie],
         (N_Pab[ib:ie] / Overlap[ib:ie]) / (N_Pab[ib] / Overlap[ib]),
-        linewidth=3,
-        label='Data',
-        color='blue'
+        linewidth=3, label='Data', color='blue'
     )
     ax1.plot(
-        x,
-        func_power(x, sweeping_eff),
-        label=f'Fit: $x^{{{sweeping_eff:.3f}}}$',
-        color='cyan',
-        linestyle='--'
+        x, func_power(x, sweeping_eff),
+        label=f'Fit: $x^{{{sweeping_eff:.3f}}}$', color='cyan', linestyle='--'
     )
 
-    # Right y-axis (derivative)
-    ax2.plot(
-        x,
-        derivative_values,
-        linewidth=2,
-        label=f"Derivative (mean={derivative_fit:.3f})",
-        color='red',
-        linestyle='-.'
+    # --- Key idea: scale derivative to primary axis, then map right axis labels back ---
+    deriv0 = sweeping_eff  # derivative at x=1
+    deriv_scaled = derivative_values / deriv0  # starts at 1, matches left-axis scale
+
+    # Plot scaled derivative on ax1 (so it shares the y-scale with data)
+    line_deriv, = ax1.plot(
+        x, deriv_scaled,
+        linewidth=2, linestyle='-.', color='red',
+        label=f"Derivative (mean={derivative_fit:.3f})"
     )
 
-    # Axis labels and scales
+    # Secondary y-axis that converts primary-units <-> derivative-units
+    # forward: y_primary -> y_derivative ; inverse: y_derivative -> y_primary
+    secax = ax1.secondary_yaxis(
+        'right',
+        functions=(lambda y: y * deriv0,  # show derivative values on right
+                   lambda d: d / deriv0)  # convert derivative->primary for ticks
+    )
+    secax.set_ylabel('Derivative')
+
+    # Scales, labels, title
     ax1.set_xlabel('Normalized L_ov')
     ax1.set_ylabel('Normalized N_Pab/L_ov', color='blue')
-    ax2.set_ylabel('Derivative', color='red')
-
     ax1.set_xscale('log')
     ax1.set_yscale('log')
-    ax2.set_yscale('log')
-    ax2.invert_yaxis()
-    # Title and grid
+    # (No invert on right axis anymore)
+
     plt.title(f"Sweeping efficiency = {sweeping_eff:.3f} | Mean derivative = {derivative_fit:.3f}")
     ax1.grid(True, which='both', ls='--')
 
-    # Combine legends from both axes
+    # Legend
     lines1, labels1 = ax1.get_legend_handles_labels()
-    lines2, labels2 = ax2.get_legend_handles_labels()
-    ax1.legend(lines1 + lines2, labels1 + labels2, loc='best')
+    ax1.legend(lines1, labels1, loc='best')
 
     plt.tight_layout()
 
-    # Save figure
     os.makedirs(dir_input_file, exist_ok=True)
     fig.savefig(os.path.join(dir_input_file, f"{name_output_file}_results.png"), dpi=200, bbox_inches='tight')
     plt.show()

@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from dimensionsless import nondimensional as simulation
+from new_code import run_simulation as simulation
 from generic_analyse_script import run_analysis as analyse  # call analysis without animations
 from new_analyse_update_290925 import run_sweeping_eff
 import gc

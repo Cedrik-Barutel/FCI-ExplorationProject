@@ -12,14 +12,13 @@ def commacolon(x):
     s = str(x)
     return s.replace('.', ',') if '.' in s else s
 
-def nondimensional(diff: float, activity: float, debug_plots: bool = False):
+def nondimensional(Dam: float, Pe: float, debug_plots: bool = False):
     logger = logging.getLogger(__name__)
 
     # VARIABLES
-    folder_name = f"Nondimensional_diff_{commacolon(diff)}_koff_{commacolon(activity)}"
+    folder_name = f"Nondimensional_Dam_{commacolon(Dam)}_Pe_{commacolon(Pe)}"
     working_path = os.path.dirname(__file__)
     folder = f"{working_path}/test_nondim/{folder_name}"
-    Dam = activity/diff
     N_save = 200  # number of save steps
     timestep = 5e-4  # timestep
     stop_time = 5 * 60  # max simulating time
@@ -52,7 +51,7 @@ def nondimensional(diff: float, activity: float, debug_plots: bool = False):
     Dam1 = LS.Coefficient("Dam1", 0)  # always zero in our case
     Dam2 = LS.Coefficient("Dam2", Dam)  # DAMKOHLER NUMBER # we choose
 
-    Pe1 = LS.Coefficient("Pe1", 1)  # PECLET NUMBER # we choose
+    Pe1 = LS.Coefficient("Pe1", Pe)  # PECLET NUMBER # we choose
     Pe2 = LS.Coefficient("Pe2", 0)  # always zero
 
     D_Pa = LS.Coefficient("D_Pa", 0.05)  # motors bound to (a) The value we fix
@@ -330,7 +329,7 @@ def nondimensional(diff: float, activity: float, debug_plots: bool = False):
     h5_path = f"{folder}/{folder_name}_s1.h5"
     print(h5_path)
     print("\nduration:")
-    print(T_N1 - date)
+
 
     # Cleanup to release memory across batch runs
     try:
