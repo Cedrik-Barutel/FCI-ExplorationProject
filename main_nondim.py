@@ -6,10 +6,15 @@ from new_analyse_update_290925_nondim import run_sweeping_eff
 import gc
 import matplotlib.pyplot as plt
 import numpy as np
+import configparser
 
 def auto_simulation():
+    # Config-Parser erstellen
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    sim_plan_name = config["non_dim"]["sim_plan_name"]
     cwd = os.getcwd()
-    plan_path = f"{cwd}/nondim_simulation_plan.csv"
+    plan_path = f"{cwd}/{sim_plan_name}"
     plan = pd.read_csv(plan_path)
 
     # Ensure expected columns
@@ -39,8 +44,12 @@ def auto_simulation():
         gc.collect()
 
 def auto_analysis():
+    # Config-Parser erstellen
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    analyse_plan_name = config["non_dim"]["analyse_plan_name"]
     cwd = os.getcwd()
-    plan_path = f"{cwd}/nondim_analyse_plan.csv"
+    plan_path = f"{cwd}/{analyse_plan_name}"
     plan = pd.read_csv(plan_path)
     # Ensure expected columns
     if "done" not in plan.columns:
@@ -64,8 +73,12 @@ def auto_analysis():
 
 
 def create_results():
+    # Config-Parser erstellen
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    directory = config["non_dim"]["directory"]
     cwd = os.getcwd()
-    test_dir = f"{cwd}/test_nondim/"
+    test_dir = f"{cwd}/{directory}"
     results_df = pd.DataFrame()
     for folder in os.listdir(test_dir):
         folder_path = os.path.join(test_dir, folder)
@@ -109,7 +122,7 @@ def create_results():
     ax.set_ylabel('Pe')
     ax.set_title('Sweeping Efficiency')
     plt.tight_layout()
-    plt.savefig(f"test_nondim/sweeping_eff.png")
+    plt.savefig(f"{directory}sweeping_eff.png")
     plt.show()
 
     # Pivot the dataframe for derivative_fit
@@ -130,7 +143,7 @@ def create_results():
     ax2.set_ylabel('Pe')
     ax2.set_title('Derivative of Fit')
     plt.tight_layout()
-    plt.savefig(f"test_nondim/derivative_fit.png")
+    plt.savefig(f"{directory}derivative_fit.png")
     plt.show()
 
     return

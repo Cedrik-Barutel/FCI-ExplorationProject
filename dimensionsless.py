@@ -7,18 +7,21 @@ import numpy as np
 import os
 import csv
 import lib_simulation as LS
-
+import configparser
 def commacolon(x):
     s = str(x)
     return s.replace('.', ',') if '.' in s else s
 
 def nondimensional(Dam: float, Pe: float, debug_plots: bool = False):
     logger = logging.getLogger(__name__)
-
+    # Config-Parser erstellen
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    directory = config["non_dim"]["directory"]
     # VARIABLES
     folder_name = f"Nondimensional_Dam_{commacolon(Dam)}_Pe_{commacolon(Pe)}"
     working_path = os.path.dirname(__file__)
-    folder = f"{working_path}/test_nondim/{folder_name}"
+    folder = f"{working_path}/{directory}{folder_name}"
     N_save = 200  # number of save steps
     timestep = 5e-4  # timestep
     stop_time = 5 * 60  # max simulating time

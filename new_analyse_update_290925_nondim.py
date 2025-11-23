@@ -9,30 +9,28 @@ Created on Tue Mar 25 10:18:43 2025
 import numpy as np
 import matplotlib.pyplot as plt
 import dedalus.public as d3
-import datetime
 from matplotlib.animation import FuncAnimation
-import scipy
 from scipy.optimize import curve_fit
-# from scipy.differentiate import derivative
 from scipy import integrate
 import pandas as pd
 import scipy as scipy
-import logging
 import os
-import sys
-
+import configparser
 
 def commacolon(x):
     s = str(x)
     return s.replace('.', ',') if '.' in s else s
 
 def run_sweeping_eff(Dam, Pe):
-
+    # Config-Parser erstellen
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    directory = config["non_dim"]["directory"]
     name = f"Nondimensional_Dam_{commacolon(Dam)}_Pe_{commacolon(Pe)}"
     name_input_file = name+'_s1'
     extension_input_file = '.h5'
     working_path = os.path.dirname(__file__)
-    folder = f"{working_path}/test_nondim/{name}"
+    folder = f"{working_path}/{directory}{name}"
     dir_input_file = f"{folder}/"
     dir_output_file = folder
     name_output_file = f"output_{name}"

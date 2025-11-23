@@ -6,10 +6,15 @@ from new_analyse_update_290925 import run_sweeping_eff
 import gc
 import matplotlib.pyplot as plt
 import numpy as np
+import configparser
 
 def auto_simulation():
+    # Config-Parser erstellen
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    sim_plan_name = config["dim"]["sim_plan_name"]
     cwd = os.getcwd()
-    plan_path = f"{cwd}/simulation_plan.csv"
+    plan_path = f"{cwd}/{sim_plan_name}"
     plan = pd.read_csv(plan_path)
 
     # Ensure expected columns
@@ -39,8 +44,12 @@ def auto_simulation():
         gc.collect()
 
 def auto_analysis():
+    # Config-Parser erstellen
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    analyse_plan_name = config["dim"]["analyse_plan_name"]
     cwd = os.getcwd()
-    plan_path = f"{cwd}/analyse_plan.csv"
+    plan_path = f"{cwd}/{analyse_plan_name}"
     plan = pd.read_csv(plan_path)
     # Ensure expected columns
     if "done" not in plan.columns:
@@ -64,8 +73,12 @@ def auto_analysis():
 
 
 def create_results():
+    # Config-Parser erstellen
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    directory = config["non_dim"]["directory"]
     cwd = os.getcwd()
-    test_dir = f"{cwd}/test/"
+    test_dir = f"{cwd}/{directory}"
     results_df = pd.DataFrame()
     for folder in os.listdir(test_dir):
         folder_path = os.path.join(test_dir, folder)
@@ -107,7 +120,7 @@ def create_results():
     ax.set_ylabel('k_off')
     ax.set_title('Sweeping Efficiency')
     plt.tight_layout()
-    plt.savefig(f"test/sweeping_eff.png")
+    plt.savefig(f"{directory}sweeping_eff.png")
     plt.show()
 
     # Pivot the dataframe for derivative_fit
@@ -128,34 +141,11 @@ def create_results():
     ax2.set_ylabel('k_off')
     ax2.set_title('Derivative of Fit')
     plt.tight_layout()
-    plt.savefig(f"test/derivative_fit.png")
+    plt.savefig(f"{directory}derivative_fit.png")
     plt.show()
-    '''
-    results_df['Dam'] = results_df['k_off'] / results_df['diffusion']
-    result_df = results_df.drop_duplicates(subset=['Dam'])
-    result_df = result_df.sort_values(by='Dam', ascending=True)
-
-    plt.figure(figsize=(8, 5))
-
-    # y1: sweeping_efficiency
-    plt.plot(result_df['Dam'], result_df['sweeping efficiency'], label='Sweeping Efficiency', marker='o')
-
-    # y2: derivative_fit
-    plt.plot(result_df['Dam'], result_df['derivative_fit'], label='Derivative Fit', marker='s')
-
-    plt.xscale('log')
-    plt.xlabel('Damköhler Number')
-    plt.ylabel('Value')
-    plt.title('Sweeping Efficiency and Derivative Fit vs Damköhler Number')
-
-    plt.legend()
-    plt.grid(True)
-    plt.savefig("test_nondim/sweeping_eff_dam.png", dpi=300, bbox_inches='tight')
-    plt.show()
-    '''
     return
 
 if __name__ == "__main__":
-    #auto_simulation()
+    auto_simulation()
     auto_analysis()
     create_results()

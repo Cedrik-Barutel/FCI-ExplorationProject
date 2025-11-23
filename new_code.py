@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import integrate
 import dedalus.public as d3
-
+import configparser
 # Local imports (assumed available in project)
 import lib_simulation as LS
 
@@ -25,10 +25,14 @@ def run_simulation(diff: float, activity: float, debug_plots: bool = False):
       - False (default): minimize plotting/UI overhead for batch runs
       - True: show intermediate diagnostic plots
     """
+    # Config-Parser erstellen
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    directory = config["non_dim"]["directory"]
     # --- parameters formerly globals, now from args ---
     folder_name = f"Braun2011_diff_{commacolon(diff)}_chem_{commacolon(activity)}"
     working_path = os.path.dirname(__file__)
-    folder = f"{working_path}/test/{folder_name}"
+    folder = f"{working_path}/{directory}{folder_name}"
 
     # Lighter IO for batch runs
     N_save = 200  # number of savesteps
