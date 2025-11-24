@@ -14,6 +14,7 @@ from scipy import integrate
 import logging
 import os
 import sys
+import configparser
 
 # local library
 dir_local = os.path.dirname(__file__)
@@ -21,8 +22,6 @@ sys.path.append(dir_local)
 
 logger = logging.getLogger(__name__)
 import lib_simulation as LS
-
-# ... existing code ...
 
 def run_analysis(diff: float, activity: float, bool_anim: bool = True, plots: bool = False):
     """
@@ -38,10 +37,13 @@ def run_analysis(diff: float, activity: float, bool_anim: bool = True, plots: bo
             return str(x).replace('.', ',')
         else:
             return str(x)
-
+    # Config-Parser erstellen
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    directory = config["non_dim"]["directory"]
     name = f"Braun2011_diff_{commacolon(diff)}_chem_{commacolon(activity)}"
     cwd = os.getcwd()
-    dir_input_file = f"{cwd}/test/{name}/"
+    dir_input_file = f"{cwd}/{directory}{name}/"
     name_input_file = name + '_s1'
     extension_input_file = '.h5'
 

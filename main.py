@@ -1,8 +1,8 @@
 import os
 import pandas as pd
-from new_code import run_simulation as simulation
+from simulation import run_simulation as simulation
 from generic_analyse_script import run_analysis as analyse  # call analysis without animations
-from new_analyse_update_290925 import run_sweeping_eff
+from sweeping_efficiency import run_sweeping_eff
 import gc
 import matplotlib.pyplot as plt
 import numpy as np

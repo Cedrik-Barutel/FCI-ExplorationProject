@@ -1,8 +1,8 @@
 import os
 import pandas as pd
-from dimensionsless import nondimensional as simulation
+from nondim_simulation import nondimensional as simulation
 from generic_analyse_script_nondim import run_analysis as analyse  # call analysis without animations
-from new_analyse_update_290925_nondim import run_sweeping_eff
+from sweeping_efficiency_nondim import run_sweeping_eff
 import gc
 import matplotlib.pyplot as plt
 import numpy as np
